@@ -1,6 +1,10 @@
 import functions
 import PySimpleGUI as sg
+import time
 
+sg.theme("DarkGrey10")
+
+clock = sg.Text('', key="clock")
 label = sg.Text("Type in a to-do")
 input_bux = sg.InputText(tooltip="Enter todo", key="todo") # Sets the dict key name to to-do
 add_button = sg.Button("Add")
@@ -11,17 +15,22 @@ complete_button = sg.Button("Complete")
 exit_button = sg.Button("Exit")
 
 window = sg.Window('My To-Do App',
-                   layout=[[label], [input_bux, add_button],
+                   layout=[[clock],
+                           [label], [input_bux, add_button],
                            [list_box, edit_button, complete_button],
                            [exit_button]],
                    font=('Helvetica', 20))
 
 while True:
-    event, values = window.read()  # splitting up the values of the tuple. event grabs the label
+    # timeout is to allow window to update time every 10 ms
+    event, values = window.read(timeout=10)  # splitting up the values of the tuple. event grabs the label
     # of the event
+    window["clock"].update(value=time.strftime("%b %d, %Y %H:%M:%S"))
+    '''
     print(1, event)
     print(2, values)
     print(3, values['todos'])
+    '''
     match event:
         case "Add":
             todos = functions.get_todos()
@@ -31,21 +40,27 @@ while True:
             window['todos'].update(values=todos)
 
         case "Edit":
-            todo_to_edit = values['todos'][0]
-            new_todo = values['todo']
+            try:
+                todo_to_edit = values['todos'][0]
+                new_todo = values['todo']
 
-            todos = functions.get_todos()
-            index = todos.index(todo_to_edit) # grabs the index of the selected to-do to be edited
-            todos[index] = new_todo # replaces
-            functions.write_todos(todos) # updates the list
-            window['todos'].update(values=todos) # updayes the list window with new to-dos
+                todos = functions.get_todos()
+                index = todos.index(todo_to_edit) # grabs the index of the selected to-do to be edited
+                todos[index] = new_todo # replaces
+                functions.write_todos(todos) # updates the list
+                window['todos'].update(values=todos) # updayes the list window with new to-dos
+            except IndexError:
+                sg.popup("Please select an item first.", font=("Helvetica, 20"))
         case "Complete":
-            todo_to_complete = values['todos'][0]
-            todos = functions.get_todos()
-            todos.remove(todo_to_complete) # List method
-            functions.write_todos(todos)
-            window['todos'].update(values=todos)
-            window['todo'].update(value='') # value instead of values since it only contains 1
+            try:
+                todo_to_complete = values['todos'][0]
+                todos = functions.get_todos()
+                todos.remove(todo_to_complete) # List method
+                functions.write_todos(todos)
+                window['todos'].update(values=todos)
+                window['todo'].update(value='') # value instead of values since it only contains 1
+            except IndexError:
+                sg.popup("Please select an item first.", font=("Helvetica, 20"))
         case "Exit":
             break
         case 'todos':
