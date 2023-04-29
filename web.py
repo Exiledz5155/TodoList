@@ -16,10 +16,16 @@ st.subheader("This is my todo app.")
 st.write("I made this app to improve your productivity.")
 
 
-for todo in todos:
-    st.checkbox(todo)
+for index, todo in enumerate(todos):
+    checkbox = st.checkbox(todo, key=todo)
+    if checkbox:
+        todos.pop(index) # using enumerate and index, we can find the exact pair to pop
+        functions.write_todos(todos) # updates the todos.txt
+        del st.session_state[todo] # delete the pair from the session state
+        st.experimental_rerun() # refreshes the page
+
 
 st.text_input(label="", placeholder="Add new todo...",
               on_change=add_todo, key='new_todo')
 
-st.session_state
+# st.session_state
