@@ -4,7 +4,7 @@ import time
 import os
 
 
-if not os.path.exist("todo.txt"):
+if not os.path.exists("todo.txt"):
     with open("todos.txt", 'w') as file:
         pass
 
